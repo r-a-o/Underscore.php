@@ -8,22 +8,22 @@
  * For docs, license, tests, and downloads, see: http://brianhaveri.github.com/Underscore.php
  */
 
-// Returns an instance of __ for OO-style calls
-function __($item=null) {
-  $__ = new __;
+// Returns an instance of Underscore for OO-style calls
+function Underscore($item=null) {
+  $__ = new Underscore();
   if(func_num_args() > 0) $__->_wrapped = $item;
   return $__;
 }
 
 // Underscore.php
-class __ {
+class Underscore {
   
   // Start the chain
   private $_chained = false; // Are we in a chain?
   public function chain($item=null) {
     list($item) = self::_wrapArgs(func_get_args(), 1);
     
-    $__ = (isset($this) && isset($this->_chained) && $this->_chained) ? $this : __($item);
+    $__ = (isset($this) && isset($this->_chained) && $this->_chained) ? $this : Underscore($item);
     $__->_chained = true;
     return $__;
   }
@@ -833,8 +833,19 @@ class __ {
     for($i=0; $i<$n; $i++) $iterator($i);
     return self::_wrap(null);
   }
-  
-  
+
+  // Give Underscore class/function a new name
+  public static function noConflict($name=null) {
+    if ($name && !class_exists($name) && !function_exists($name)) {
+      class_alias('Underscore', $name);
+      eval("function $name(\$item=null) {return Underscore(\$item);}");
+      return $name;
+    } else {
+      return 'Underscore';
+    }
+  }
+
+
   // Extend the class with your own functions
   private $_mixins = array();
   public function mixin($functions=null) {
@@ -1118,3 +1129,9 @@ class __ {
     return (!is_array($collection) && !is_object($collection)) ? str_split((string) $collection) : $collection;
   }
 }
+
+if (!class_exists('__') && !function_exists('__')) {
+  class_alias('Underscore', '__');
+  eval("function __(\$item=null) {return Underscore(\$item);}");
+}
+

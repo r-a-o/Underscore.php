@@ -2,6 +2,19 @@
 
 class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
 
+  public function testNoConflict() {
+    Underscore::noConflict('___');
+    $moe = array('name'=>'moe');
+    $this->assertEquals($moe, ___::identity($moe));
+    $this->assertEquals($moe, ___($moe)->identity());
+
+    $_ = Underscore::noConflict();
+    $this->assertEquals($moe, $_::identity($moe));
+    $this->assertEquals($moe, $_($moe)->identity());
+  }
+
+
+
   public function testIdentity() {
     // from js
     $moe = array('name'=>'moe');
