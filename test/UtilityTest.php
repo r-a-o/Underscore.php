@@ -25,7 +25,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
     // extra
     $this->assertEquals($moe, __($moe)->identity());
     $this->assertEquals($moe_obj, __($moe_obj)->identity());
-    
+
     // docs
     $moe = array('name'=>'moe');
     $this->assertTrue($moe === __::identity($moe));
@@ -36,7 +36,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(0, __::uniqueId());
     $this->assertEquals('stooge_1', __::uniqueId('stooge_'));
     $this->assertEquals(2, __::uniqueId());
-    
+
     // from js
     $ids = array();
     $i = 0;
@@ -60,7 +60,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
     $vals = array();
     __(3)->times(function($i) use (&$vals) { $vals[] = $i; });
     $this->assertEquals(array(0,1,2), $vals, 'works as a wrapper in OO-style call');
-  
+
     // docs
     $result = '';
     __::times(3, function() use (&$result) { $result .= 'a'; });
@@ -78,7 +78,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
     ));
     $this->assertEquals('aecanap', __::myReverse('panacea'), 'mixed in a function to _');
     $this->assertEquals('pmahc', __('champ')->myReverse(), 'mixed in a function to _ with OO-style call');
-    
+
     // docs
     __::mixin(array(
       'capitalize'=> function($string) { return ucwords($string); },
@@ -96,7 +96,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
 
     $backslashTemplate = __::template('<%= $thing %> is \\ridanculous');
     $this->assertEquals('This is \\ridanculous', $backslashTemplate(array('thing'=>'This')));
-    
+
     $escapeTemplate = __::template('<%= $a ? "checked=\\"checked\\"" : "" %>');
     $this->assertEquals('checked="checked"', $escapeTemplate(array('a'=>true)), 'can handle slash escapes in interpolations');
 
@@ -131,7 +131,7 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
 
     $withNewlinesAndTabs = __::template('This\n\t\tis: <%= $x %>.\n\tok.\nend.');
     $this->assertEquals('This\n\t\tis: that.\n\tok.\nend.', $withNewlinesAndTabs((object) array('x'=>'that')));
-    
+
     $template = __::template('<i><%- $value %></i>');
     $result = $template((object) array('value'=>'<script>'));
     $this->assertEquals('<i>&lt;script&gt;</i>', $result);
@@ -183,41 +183,41 @@ class UnderscoreUtilityTest extends PHPUnit_Framework_TestCase {
 
     $result = __('<%= $thing %> is gettin\' on my <%= $nerves %>!')->template(array('thing'=>'This', 'nerves'=>'noives'));
     $this->assertEquals("This is gettin' on my noives!", $result, 'can do basic attribute interpolation for multiple variables with OO-style call');
-  
+
     $result = __('<%
       if($foo == "bar"){
     %>Statement quotes and \'quotes\'.<% } %>')->template((object) array('foo'=>'bar'));
     $this->assertEquals("Statement quotes and 'quotes'.", $result);
-    
+
     // docs
     $compiled = __::template('hello: <%= $name %>');
     $result = $compiled(array('name'=>'moe'));
     $this->assertEquals('hello: moe', $result);
-    
+
     $list = '<% __::each($people, function($name) { %><li><%= $name %></li><% }); %>';
     $result = __::template($list, array('people'=>array('moe', 'curly', 'larry')));
     $this->assertEquals('<li>moe</li><li>curly</li><li>larry</li>', $result);
-    
+
     __::templateSettings(array(
       'interpolate' => '/\{\{(.+?)\}\}/'
     ));
     $mustache = __::template('Hello {{$planet}}!');
     $result = $mustache(array('planet'=>'World'));
     $this->assertEquals('Hello World!', $result);
-    
+
     $template = __::template('<i><%- $value %></i>');
     $result = $template(array('value'=>'<script>'));
     $this->assertEquals('<i>&lt;script&gt;</i>', $result);
-    
+
     $sans = __::template('A <% $this %> B');
     $this->assertEquals('A  B', $sans());
   }
-  
+
   public function testEscape() {
     // from js
     $this->assertEquals('Curly &amp; Moe', __::escape('Curly & Moe'));
     $this->assertEquals('Curly &amp;amp; Moe', __::escape('Curly &amp; Moe'));
-    
+
     // extra
     $this->assertEquals('Curly &amp; Moe', __('Curly & Moe')->escape());
     $this->assertEquals('Curly &amp;amp; Moe', __('Curly &amp; Moe')->escape());
