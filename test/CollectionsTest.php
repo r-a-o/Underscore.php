@@ -576,7 +576,6 @@ class UnderscoreCollectionsTest extends PHPUnit_Framework_TestCase {
   }
 
   /*
-
   public function testSortedIndex() {
     // from js
     $numbers = array(10, 20, 30, 40, 50);
@@ -590,7 +589,6 @@ class UnderscoreCollectionsTest extends PHPUnit_Framework_TestCase {
     // docs
     $this->assertEquals(3, __::sortedIndex(array(10, 20, 30, 40), 35));
   }
-
   */
 }
 
@@ -608,5 +606,4 @@ class Something {
         $this->value = $this->value + $n + $m;
         return $this;
     }
-
 }

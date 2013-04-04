@@ -33,7 +33,7 @@ class _Underscore {
     $this->_chained = $chained;
   }
 
-  // -- Collection
+  // -- Collections --
 
   // public function forEach($iterator) {return $this->each($iterator);}
   public function each($iterator) {
@@ -319,22 +319,225 @@ class _Underscore {
   }
 
 
+  // -- Arrays --
 
-
-
-
-
-
-
-
-
-
-
+  public function head($n=null) {return $this->first($n);}
+  public function take($n=null) {return $this->first($n);}
   public function first($n=null) {
-    if ($n === 0) return $this->_result(array());
-    if(is_null($n)) return $this->_result(current(array_splice($this->_items, 0, 1, true)));
-    return $this->_result(array_splice($this->_items, 0, $n, true));
+    if (is_null($n)) {
+      return $this->_result(array_shift(array_values($this->_items)));
+    } else {
+      return $this->_result(array_slice($this->_items, 0, $n, true));
+    }
   }
+
+  public function initial($n=1) {
+    return $this->_result(array_splice(
+      array_values($this->_items),
+      0,
+      count($this->_items) - $n
+    ));
+  }
+
+  public function last($n=null) {
+    if (is_null($n)) {
+      return $this->_result(array_pop(array_values($this->_items)));
+    } else {
+      return $this->_result(array_slice(
+        $this->_items,
+        (count($this->_items) - $n > 0 ? count($this->_items) - $n : 0),
+        null,
+        true));
+    }
+  }
+
+  public function tail($index=1) {return $this->rest($index);}
+  public function drop($index=1) {return $this->rest($index);}
+  public function rest($index=1) {
+    return $this->_result(array_values(array_slice(
+      $this->_items,
+      $index > 0 ? $index : 0,
+      null,
+      true)));
+  }
+
+  public function compact() {
+    $collects = array();
+    foreach ($this->_items as $k => $v) {
+      if ((bool)$v) {
+        $collects[] = $v;
+      }
+    }
+
+    return $this->_result($collects);
+  }
+
+  public function flatten($shallow=false) {
+    $collects = array();
+    foreach ($this->_items as $k => $v) {
+      if (is_array($v)) {
+        $__ = new _Underscore($v);
+        $collects = array_merge($collects, ($shallow) ? $v : $__->flatten(false));
+      } else {
+        $collects[] = $v;
+      }
+    }
+
+    return $this->_result($collects);
+  }
+
+  public function without(/* values */) {
+    $values = func_get_args();
+
+    $result = $this->_items;
+    foreach ($result as $k => $v) {
+      if (is_object($v)) {
+        foreach ($values as $r) {
+          if ($v === $r) {
+            unset($result[$k]);
+          }
+        }
+      } else {
+        if (in_array($v, $values)) {
+          unset($result[$k]);
+        }
+      }
+    }
+
+    return $this->_result($result);
+  }
+
+  public function union(/* arrays */) {
+    $arrays = func_get_args();
+
+    $result = array_values(array_unique(call_user_func_array('array_merge', array_merge(array($this->_items), $arrays))));
+    return $this->_result($result);
+  }
+
+  public function intersection(/* arrays */) {
+    $arrays = func_get_args();
+    $result = array_values(array_unique(call_user_func_array('array_intersect', array_merge(array($this->_items), $arrays))));
+    return $this->_result($result);
+  }
+
+  public function difference(/* arrays */) {
+    $arrays = func_get_args();
+    $result = array_values(array_unique(call_user_func_array('array_diff', array_merge(array($this->_items), $arrays))));
+    return $this->_result($result);
+  }
+
+  public function unique($is_sorted=false, $iterator=null) {return $this->uniq($is_sorted, $iterator);}
+  public function uniq($is_sorted=false, $iterator=null) {
+    $calculated = array();
+    $result = array();
+    foreach($this->_items as $v) {
+      $val = (!is_null($iterator)) ? $iterator($v) : $v;
+      if(is_bool(array_search($val, $calculated, true))) {
+        $calculated[] = $val;
+        $result[] = $v;
+      }
+    }
+
+    return $this->_result($result);
+  }
+
+  public function zip(/* $arrays */) {
+    $arrays = array_merge( array($this->_items), func_get_args());
+
+    $num_of_result = max(array_map(function($a) {
+      return count($a);
+    }, $arrays));
+
+    $result = array_fill(0, $num_of_result, array());
+
+    foreach ($arrays as $k => $a) {
+      foreach ($result as $j => $v) {
+        $result[$j][$k] = $a[$j];
+      }
+    }
+
+    return $this->_result($result);
+  }
+
+  public function object($values=null) {
+    if ($values) {
+      $result = (object) array_combine($this->_items, $values);
+    } else {
+      $result = (object) $this->_items;
+    }
+
+    return $this->_result($result);
+  }
+
+  public function indexOf($value, $is_sorted=false) {
+    $collection = $this->_collection($this->_items);
+    $key = array_search($value, $collection, true);
+    return $this->_result((is_bool($key)) ? -1 : $key);
+  }
+
+  public function lastIndexOf($value, $from_index=null) {
+    $collection = $this->_collection($this->_items);
+    // TODO from_index
+    // $from_index = $from_index ? $from_index : count($collection);
+    krsort($collection);
+    $key = array_search($value, $collection, true);
+    return $this->_result((is_bool($key)) ? -1 : $key);
+  }
+
+  public function sortedIndex($value, $iterator=null) {
+    $collection = $this->_collection($this->_items);
+
+    $calculated_value = (!is_null($iterator)) ? $iterator($value) : $value;
+
+    while(count($collection) > 1) {
+      $midpoint = floor(count($collection) / 2);
+      $midpoint_values = array_slice($collection, $midpoint, 1);
+      $midpoint_value = $midpoint_values[0];
+      $midpoint_calculated_value = (!is_null($iterator)) ? $iterator($midpoint_value) : $midpoint_value;
+
+      $collection = ($calculated_value < $midpoint_calculated_value) ? array_slice($collection, 0, $midpoint, true) : array_slice($collection, $midpoint, null, true);
+    }
+    $keys = array_keys($collection);
+
+    return $this->_result(current($keys) + 1);
+  }
+
+  public function range(/* $start=0, $stop, $step=1 */) {
+    $args = array_merge(array($this->_items), func_get_args());
+    switch(count($args)) {
+      case 0:
+        return $this->_result(array());
+        break;
+      case 1:
+        list($start, $stop, $step) = array(0, $args[0], 1);
+        if ($stop == 0) return $this->_result(array());
+        break;
+      case 2:
+        list($start, $stop, $step) = array($args[0], $args[1], 1);
+        if($stop < $start) return $this->_result(array());
+        break;
+      case 3:
+      default:
+        list($start, $stop, $step) = array($args[0], $args[1], $args[2]);
+        if($step > 0 && $step > $stop) return $this->_result(array($start));
+        break;
+    }
+
+    $stop = $stop > $start
+      ? $stop - 1
+      : $stop + 1;
+
+    $result = range($start, $stop, $step);
+
+    return $this->_result($result);
+  }
+
+
+
+
+
+
+
 
   // -- Utility
   public function identity($value=null) {
