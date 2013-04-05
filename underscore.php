@@ -533,6 +533,20 @@ class _Underscore {
   }
 
 
+  // -- Functions
+  public function partial(/* arguments */) {
+    $args = func_get_args();
+    $function = $this->_items;
+
+    $result = function(/**/) use ($function, $args) {
+      return call_user_func_array($function, array_merge($args, func_get_args()));
+    };
+
+    return $this->_result($result);
+  }
+
+
+
 
 
 
