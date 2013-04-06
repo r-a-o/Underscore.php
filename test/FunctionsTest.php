@@ -9,10 +9,8 @@ class UnderscoreFunctionsTest extends PHPUnit_Framework_TestCase {
     // $minus = function($a, $b) {return $a - $b;};
     // $minus5 = __::partial($minus, null, 4);
     // TODO
-
   }
 
-  /*
   public function testMemoize() {
     // from js
     $fib = function($n) use (&$fib) {
@@ -62,6 +60,8 @@ class UnderscoreFunctionsTest extends PHPUnit_Framework_TestCase {
     $fastFibonacci = __::memoize($fibonacci);
     $this->assertEquals($fibonacci(2), $fastFibonacci(2));
   }
+
+  /*
 
   /*
 

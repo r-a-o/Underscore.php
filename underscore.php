@@ -545,6 +545,31 @@ class _Underscore {
     return $this->_result($result);
   }
 
+  public function memoize($hash_function=null) {
+    $_memoized = array();
+
+    $function = $this->_items;
+    $self = $this;
+    return $this->_result(function() use ($function, &$self, $hashFunction, &$_memoized) {
+      // Generate a key based on hashFunction
+      $args = func_get_args();
+      if(is_null($hashFunction)) $hashFunction = function($function, $args) {
+
+        // Try using var_export to identify the function
+        return md5(join('_', array(
+          var_export($function, true),
+          var_export($args, true)
+        )));
+      };
+      $key = $hashFunction($function, $args);
+
+      if(!array_key_exists($key, $_memoized)) {
+        $_memoized[$key] = call_user_func_array($function, $args);
+      }
+      return $_memoized[$key];
+    });
+  }
+
 
 
 
