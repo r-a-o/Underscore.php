@@ -112,6 +112,7 @@ class UnderscoreArraysTest extends PHPUnit_Framework_TestCase {
 
     // extra
     $this->assertEquals(array(1, 2, 3), __::compact($vals), 'can remove all falsy values');
+    $this->assertEquals(array('a', 'b', ' ', 'd'), __::compact('ab d'));
 
     // docs
     $this->assertEquals(array(true, 'a', 1), __::compact(array(false, true, 'a', 0, 1, '')));

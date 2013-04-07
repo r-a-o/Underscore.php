@@ -25,11 +25,11 @@ class Underscore {
 // Underscore.php
 class _Underscore {
 
-  private $_items; // Value passed from one chained method to the next
+  private $_wrapped; // Value passed from one chained method to the next
   private $_chained = false; // Are we in a chain?
 
-  public function __construct($items, $chained=false) {
-    $this->_items = $items;
+  public function __construct($wrapped, $chained=false) {
+    $this->_wrapped = $wrapped;
     $this->_chained = $chained;
   }
 
@@ -37,8 +37,8 @@ class _Underscore {
 
   // public function forEach($iterator) {return $this->each($iterator);}
   public function each($iterator) {
-    foreach ($this->_collection($this->_items) as $k => $v) {
-      call_user_func_array($iterator, array($v, $k, $this->_items));
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
+      call_user_func_array($iterator, array($v, $k, $this->_wrapped));
     }
 
     return $this->_result();
@@ -47,7 +47,7 @@ class _Underscore {
   public function collect($iterator) {return $this->map($iterator);}
   public function map($iterator) {
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       $collects[] = call_user_func_array($iterator, array($v, $k));
     }
 
@@ -58,29 +58,29 @@ class _Underscore {
   public function foldl($iterator, $memo=null) {return $this->reduce($iterator, $memo);}
   public function reduce($iterator, $memo=null) {
     // TODO ?? why throwing exception
-    if(!is_object($this->_items) && !is_array($this->_items)) {
+    if(!is_object($this->_wrapped) && !is_array($this->_wrapped)) {
       if(is_null($memo)) throw new Exception('Invalid object');
     }
 
-    $collection = $this->_collection($this->_items);
+    $collection = $this->_collection($this->_wrapped);
     return $this->_result(array_reduce($collection, $iterator, $memo));
   }
 
   public function foldr($iterator, $memo=null) {return $this->reduceRight($iterator, $memo);}
   public function reduceRight($iterator, $memo=null) {
     // TODO ?? why throwing exception
-    if(!is_object($this->_items) && !is_array($this->_items)) {
+    if(!is_object($this->_wrapped) && !is_array($this->_wrapped)) {
       if(is_null($memo)) throw new Exception('Invalid object');
     }
 
-    $collection = $this->_collection($this->_items);
+    $collection = $this->_collection($this->_wrapped);
     krsort($collection);
     return $this->_result(array_reduce($collection, $iterator, $memo));
   }
 
   public function detect($iterator) {return $this->find($iterator);}
   public function find($iterator) {
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (call_user_func_array($iterator, array($v))) {
         return $this->_result($v);
       }
@@ -92,7 +92,7 @@ class _Underscore {
   public function select($iterator) {return $this->filter($iterator);}
   public function filter($iterator) {
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (call_user_func_array($iterator, array($v))) {
         $collects[] = $v;
       }
@@ -105,7 +105,7 @@ class _Underscore {
     if (!$properties) return $this->_result(array());
 
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (array_intersect_assoc($v, $properties) == $properties) {
         $collects[] = $v;
       }
@@ -118,7 +118,7 @@ class _Underscore {
     if (!$properties) return $this->_result(null);
 
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (array_intersect_assoc($v, $properties) == $properties) {
         $collects[] = $v;
       }
@@ -129,7 +129,7 @@ class _Underscore {
 
   public function reject($iterator) {
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (!call_user_func_array($iterator, array($v))) {
         $collects[] = $v;
       }
@@ -146,10 +146,10 @@ class _Underscore {
       $iterator = function($v) {return $v;};
     }
 
-    if (!is_array($this->_items) && !$this->_items) return $this->_result(false);
+    if (!is_array($this->_wrapped) && !$this->_wrapped) return $this->_result(false);
 
     $result = true;
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (!call_user_func_array($iterator, array($v, $k))) {
         $result = false;
         break;
@@ -166,7 +166,7 @@ class _Underscore {
     }
 
     $result = false;
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (call_user_func_array($iterator, array($v, $k))) {
         $result = true;
         break;
@@ -179,7 +179,7 @@ class _Underscore {
   public function includ($value) { return $this->contains($value);}
   public function contains($value) {
     $result = false;
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if ($v === $value) {
         $result = true;
       }
@@ -193,7 +193,7 @@ class _Underscore {
     array_shift($arguments); // remove first
 
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       $collects[] = call_user_func_array(array($v, $method_name), $arguments);
     }
 
@@ -202,7 +202,7 @@ class _Underscore {
 
   public function pluck($property_name) {
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (is_object($v)) {
         if (method_exists($v, $property_name)) {
           $collects[] = $v->$property_name();
@@ -221,39 +221,39 @@ class _Underscore {
 
   public function max($iterator=null) {
     if (is_null($iterator)) {
-      return $this->_result(max($this->_collection($this->_items)));
+      return $this->_result(max($this->_collection($this->_wrapped)));
     }
 
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       $collects[$k] = call_user_func_array($iterator, array($v, $k));
     }
 
     arsort($collects);
     list($first_key) = array_keys($collects);
 
-    return $this->_result($this->_items[$first_key]);
+    return $this->_result($this->_wrapped[$first_key]);
   }
 
   public function min($iterator=null) {
     if (is_null($iterator)) {
-      return $this->_result(min($this->_collection($this->_items)));
+      return $this->_result(min($this->_collection($this->_wrapped)));
     }
 
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       $collects[$k] = call_user_func_array($iterator, array($v, $k));
     }
 
     asort($collects);
     list($first_key) = array_keys($collects);
 
-    return $this->_result($this->_items[$first_key]);
+    return $this->_result($this->_wrapped[$first_key]);
   }
 
   public function sortBy($iterator) {
     $collects = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       $collects[$k] = call_user_func_array($iterator, array($v, $k));
     }
 
@@ -261,7 +261,7 @@ class _Underscore {
 
     $result = array();
     foreach ($collects as $k => $v) {
-      $result[] = $this->_items[$k];
+      $result[] = $this->_wrapped[$k];
     }
 
     return $this->_result($result);
@@ -269,7 +269,7 @@ class _Underscore {
 
   public function groupBy($iterator) {
     $groups = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (is_callable($iterator)) {
         $group = call_user_func_array($iterator, array($v, $k));
       } else if (is_string($iterator)) {
@@ -285,7 +285,7 @@ class _Underscore {
 
   public function countBy($iterator) {
     $groups = array();
-    foreach ($this->_collection($this->_items) as $k => $v) {
+    foreach ($this->_collection($this->_wrapped) as $k => $v) {
       if (is_callable($iterator)) {
         $group = call_user_func_array($iterator, array($v, $k));
       } else if (is_string($iterator)) {
@@ -306,16 +306,16 @@ class _Underscore {
 
   public function shuffle() {
     // TODO copy ?
-    shuffle($this->_items);
-    return $this->_result($this->_items);
+    shuffle($this->_wrapped);
+    return $this->_result($this->_wrapped);
   }
 
   public function toArray() {
-    return $this->_result((array)$this->_items);
+    return $this->_result((array)$this->_wrapped);
   }
 
   public function size() {
-    return $this->_result(count((array)$this->_collection($this->_items)));
+    return $this->_result(count((array)$this->_collection($this->_wrapped)));
   }
 
 
@@ -324,28 +324,31 @@ class _Underscore {
   public function head($n=null) {return $this->first($n);}
   public function take($n=null) {return $this->first($n);}
   public function first($n=null) {
+    $array = $this->_array($this->_wrapped);
     if (is_null($n)) {
-      return $this->_result(array_shift(array_values($this->_items)));
+      return $this->_result(array_shift($array));
     } else {
-      return $this->_result(array_slice($this->_items, 0, $n, true));
+      return $this->_result(array_slice($array, 0, $n, true));
     }
   }
 
   public function initial($n=1) {
+    $array = $this->_array($this->_wrapped);
     return $this->_result(array_splice(
-      array_values($this->_items),
+      $array,
       0,
-      count($this->_items) - $n
+      count($array) - $n
     ));
   }
 
   public function last($n=null) {
+    $array = $this->_array($this->_wrapped);
     if (is_null($n)) {
-      return $this->_result(array_pop(array_values($this->_items)));
+      return $this->_result(array_pop(array_values($array)));
     } else {
       return $this->_result(array_slice(
-        $this->_items,
-        (count($this->_items) - $n > 0 ? count($this->_items) - $n : 0),
+        $array,
+        (count($this->_wrapped) - $n > 0 ? count($array) - $n : 0),
         null,
         true));
     }
@@ -355,7 +358,7 @@ class _Underscore {
   public function drop($index=1) {return $this->rest($index);}
   public function rest($index=1) {
     return $this->_result(array_values(array_slice(
-      $this->_items,
+      $this->_array($this->_wrapped),
       $index > 0 ? $index : 0,
       null,
       true)));
@@ -363,7 +366,7 @@ class _Underscore {
 
   public function compact() {
     $collects = array();
-    foreach ($this->_items as $k => $v) {
+    foreach ($this->_array($this->_wrapped) as $k => $v) {
       if ((bool)$v) {
         $collects[] = $v;
       }
@@ -374,7 +377,7 @@ class _Underscore {
 
   public function flatten($shallow=false) {
     $collects = array();
-    foreach ($this->_items as $k => $v) {
+    foreach ($this->_array($this->_wrapped) as $k => $v) {
       if (is_array($v)) {
         $__ = new _Underscore($v);
         $collects = array_merge($collects, ($shallow) ? $v : $__->flatten(false));
@@ -389,7 +392,7 @@ class _Underscore {
   public function without(/* values */) {
     $values = func_get_args();
 
-    $result = $this->_items;
+    $result = $this->_array($this->_wrapped);
     foreach ($result as $k => $v) {
       if (is_object($v)) {
         foreach ($values as $r) {
@@ -408,21 +411,26 @@ class _Underscore {
   }
 
   public function union(/* arrays */) {
-    $arrays = func_get_args();
+    $result = array_values(array_unique(
+      call_user_func_array('array_merge', $this->_all_arguments(func_get_args()))
+    ));
 
-    $result = array_values(array_unique(call_user_func_array('array_merge', array_merge(array($this->_items), $arrays))));
     return $this->_result($result);
   }
 
   public function intersection(/* arrays */) {
     $arrays = func_get_args();
-    $result = array_values(array_unique(call_user_func_array('array_intersect', array_merge(array($this->_items), $arrays))));
+    $result = array_values(array_unique(
+      call_user_func_array('array_intersect', $this->_all_arguments(func_get_args()))
+    ));
     return $this->_result($result);
   }
 
   public function difference(/* arrays */) {
     $arrays = func_get_args();
-    $result = array_values(array_unique(call_user_func_array('array_diff', array_merge(array($this->_items), $arrays))));
+    $result = array_values(array_unique(
+      call_user_func_array('array_diff', $this->_all_arguments(func_get_args()))
+    ));
     return $this->_result($result);
   }
 
@@ -430,7 +438,7 @@ class _Underscore {
   public function uniq($is_sorted=false, $iterator=null) {
     $calculated = array();
     $result = array();
-    foreach($this->_items as $v) {
+    foreach($this->_array($this->_wrapped) as $v) {
       $val = (!is_null($iterator)) ? $iterator($v) : $v;
       if(is_bool(array_search($val, $calculated, true))) {
         $calculated[] = $val;
@@ -442,7 +450,7 @@ class _Underscore {
   }
 
   public function zip(/* $arrays */) {
-    $arrays = array_merge( array($this->_items), func_get_args());
+    $arrays = $this->_all_arguments(func_get_args());
 
     $num_of_result = max(array_map(function($a) {
       return count($a);
@@ -461,22 +469,24 @@ class _Underscore {
 
   public function object($values=null) {
     if ($values) {
-      $result = (object) array_combine($this->_items, $values);
+      $result = (object) array_combine($this->_wrapped, $values);
     } else {
-      $result = (object) $this->_items;
+      $result = (object) $this->_wrapped;
     }
 
     return $this->_result($result);
   }
 
+  // TODO move to Collections?
   public function indexOf($value, $is_sorted=false) {
-    $collection = $this->_collection($this->_items);
+    $collection = $this->_collection($this->_wrapped);
     $key = array_search($value, $collection, true);
     return $this->_result((is_bool($key)) ? -1 : $key);
   }
 
+  // TODO move to Collections?
   public function lastIndexOf($value, $from_index=null) {
-    $collection = $this->_collection($this->_items);
+    $collection = $this->_collection($this->_wrapped);
     // TODO from_index
     // $from_index = $from_index ? $from_index : count($collection);
     krsort($collection);
@@ -485,25 +495,25 @@ class _Underscore {
   }
 
   public function sortedIndex($value, $iterator=null) {
-    $collection = $this->_collection($this->_items);
+    $array= $this->_array($this->_wrapped);
 
     $calculated_value = (!is_null($iterator)) ? $iterator($value) : $value;
 
-    while(count($collection) > 1) {
-      $midpoint = floor(count($collection) / 2);
-      $midpoint_values = array_slice($collection, $midpoint, 1);
+    while(count($array) > 1) {
+      $midpoint = floor(count($array) / 2);
+      $midpoint_values = array_slice($array, $midpoint, 1);
       $midpoint_value = $midpoint_values[0];
       $midpoint_calculated_value = (!is_null($iterator)) ? $iterator($midpoint_value) : $midpoint_value;
 
-      $collection = ($calculated_value < $midpoint_calculated_value) ? array_slice($collection, 0, $midpoint, true) : array_slice($collection, $midpoint, null, true);
+      $array = ($calculated_value < $midpoint_calculated_value) ? array_slice($array, 0, $midpoint, true) : array_slice($array, $midpoint, null, true);
     }
-    $keys = array_keys($collection);
+    $keys = array_keys($array);
 
     return $this->_result(current($keys) + 1);
   }
 
   public function range(/* $start=0, $stop, $step=1 */) {
-    $args = array_merge(array($this->_items), func_get_args());
+    $args = $this->_all_arguments(func_get_args());
     switch(count($args)) {
       case 0:
         return $this->_result(array());
@@ -536,7 +546,7 @@ class _Underscore {
   // -- Functions
   public function partial(/* arguments */) {
     $args = func_get_args();
-    $function = $this->_items;
+    $function = $this->_wrapped;
 
     $result = function(/**/) use ($function, $args) {
       return call_user_func_array($function, array_merge($args, func_get_args()));
@@ -548,7 +558,7 @@ class _Underscore {
   public function memoize($hash_function=null) {
     $_memoized = array();
 
-    $function = $this->_items;
+    $function = $this->_wrapped;
     $self = $this;
     return $this->_result(function() use ($function, &$self, $hashFunction, &$_memoized) {
       // Generate a key based on hashFunction
@@ -570,6 +580,25 @@ class _Underscore {
     });
   }
 
+  // TODO
+
+  // -- Objects --
+  public function keys() {
+    // TODO why Exception?
+    if(!is_object($this->_wrapped) && !is_array($this->_wrapped)) throw new Exception('Invalid object');
+
+    return $this->_result(array_keys((array) $this->_object($this->_wrapped)));
+  }
+
+  public function values() {
+    return $this->_result(array_values((array) $this->_object($this->_wrapped)));
+  }
+
+  public function pairs() {
+
+  }
+
+
 
 
 
@@ -583,21 +612,38 @@ class _Underscore {
     return $this->_result($value);
   }
 
-  private function _result($val=null) {
+  private function _result($value=null) {
     if(isset($this) && isset($this->_chained) && $this->_chained) {
-      $this->_items = $val;
+      $this->_wrapped = $value;
       return $this;
     }
-    return $val;
+    return $value;
   }
 
   // Get a collection in a way that supports strings
   private function _collection($collection) {
     if (!$collection) return array();
 
-    return (!is_array($collection) && !is_object($collection))
-            ? str_split((string) $collection)
-            : $collection;
+    return (is_array($collection) || is_object($collection))
+           ? $collection
+           : str_split((string) $collection);
+  }
+
+  // Get a non-associative array in a way that supports strings
+  private function _array($collection) {
+    if (!$collection) return array();
+    if (is_object($collection)) return array();
+
+    return is_array($collection) ? array_values($collection) : str_split((string) $collection);
+  }
+
+  // Get an associative array or object
+  private function _object($collection) {
+    return (object) $collection;
+  }
+
+  private function _all_arguments($args) {
+     return array_merge(array($this->_wrapped), $args);
   }
 
 }
